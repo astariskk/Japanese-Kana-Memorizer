@@ -1,0 +1,29 @@
+.kana-font {
+    font-family: 'Noto Sans JP', sans-serif;
+}
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+}
+.dark ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+.dark ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+#dragSelectBox {
+    position: absolute;
+    border: 2px dashed #f3658e;
+    background-color: rgba(243, 101, 142, 0.15);
+    pointer-events: none;
+    z-index: 40;
+    border-radius: 6px;
+}

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kana Memorizer - Japanese Writing System Memorizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        jp: ['"Noto Sans JP"', 'sans-serif'],
+                    },
+                    colors: {
+                        sakura: {
+                            50: '#fff5f7',
+                            100: '#ffe3ec',
+                            200: '#fccada',
+                            300: '#f89db8',
+                            400: '#f3658e',
+                            500: '#e73868',
+                            600: '#d41e50',
+                            700: '#b2133e',
+                        },
+                        rose: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            300: '#fda4af',
+                            400: '#fb7185',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#be123c',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-full flex flex-col font-sans transition-colors duration-200">
+
+    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
+            <!-- Brand Title -->
+            <div class="flex items-center space-x-4">
+                <div class="w-10 h-10 rounded-xl bg-rose-500 flex items-center justify-center text-white font-bold text-xl shadow-md shadow-sakura-500/20 kana-font shrink-0">
+                    あ
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold bg-sakura-600 bg-clip-text text-transparent leading-none">Kana Memorizer</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Kana Symbols Memorizer Quiz game</p>
+                </div>
+            </div>
+
+            <!-- Header Controls (Instant Death Toggle, Settings, Theme) -->
+            <div class="flex items-center space-x-3 sm:space-x-4">
+                
+                <!-- Instant Death Mode Toggle (Beside Settings) -->
+                <div class="flex items-center space-x-2 bg-slate-100 dark:bg-slate-700/60 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600">
+                    <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Instant Death</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input id="instantDeathToggle" type="checkbox" class="sr-only peer">
+                        <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-rose-600"></div>
+                    </label>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <button id="settingsBtn" type="button" class="flex items-center space-x-1.5 bg-sakura-50 hover:bg-sakura-100 dark:bg-slate-700 dark:hover:bg-slate-600 text-sakura-700 dark:text-slate-200 px-3 py-1.5 rounded-lg text-sm font-semibold border border-sakura-200 dark:border-slate-600 transition">
+                        <svg class="w-4 h-4 text-sakura-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <span class="hidden md:inline">Settings</span>
+                    </button>
+
+                    <button id="themeToggleBtn" type="button" class="p-1.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 rounded-lg">
+                        <svg id="sunIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        <svg id="moonIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <section id="quizCardSection" class="bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-8 shadow-md border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center relative overflow-hidden min-h-[360px]">
+            <!-- Card content injected dynamically -->
+        </section>
+
+        <section class="space-y-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Active Practice Reference Table</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Click any row to jump directly. Grid capped at 3 columns maximum.</p>
+                </div>
+                <span id="activeCountLabel" class="text-xs font-semibold bg-slate-200 dark:bg-slate-700 px-2.5 py-1 rounded-md text-slate-600 dark:text-slate-300">
+                    0 Symbols Active
+                </span>
+            </div>
+
+            <div id="tableContainer" class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 min-h-[300px]">
+                <!-- Table injected dynamically -->
+            </div>
+        </section>
+    </main>
+
+    <div id="settingsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-4xl w-full mx-4 max-h-[88vh] flex flex-col shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden transform scale-95 transition-transform duration-200">
+            
+            <div class="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100">Character Selection & Settings</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Drag select cards or use quick actions to choose practice symbols.</p>
+                </div>
+                <button id="closeSettingsCross" type="button" class="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Kana Script Tab Selector -->
+            <div class="px-4 pt-3 bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between flex-wrap gap-2">
+                <div class="flex space-x-2">
+                    <button id="tabHiragana" type="button" class="px-4 py-2 text-sm font-bold rounded-t-xl border-b-2 transition flex items-center space-x-2 border-sakura-500 bg-white dark:bg-slate-800 text-sakura-600 dark:text-sakura-400 shadow-sm">
+                        <span class="w-2.5 h-2.5 rounded-full bg-sakura-500 inline-block"></span>
+                        <span>Hiragana (ひらがな)</span>
+                        <span id="tabBadgeHiragana" class="text-[10px] px-2 py-0.5 rounded-full bg-sakura-100 dark:bg-sakura-900 text-sakura-700 dark:text-sakura-300">0</span>
+                    </button>
+                    <button id="tabKatakana" type="button" class="px-4 py-2 text-sm font-bold rounded-t-xl border-b-2 transition flex items-center space-x-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">
+                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>
+                        <span>Katakana (カタカナ)</span>
+                        <span id="tabBadgeKatakana" class="text-[10px] px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900 text-rose-700 dark:text-rose-300">0</span>
+                    </button>
+                </div>
+
+                <div class="flex items-center space-x-1.5 mb-2 sm:mb-0">
+                    <button id="filterHiraganaOnly" type="button" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-sakura-100 dark:bg-sakura-900/50 text-sakura-700 dark:text-sakura-300 hover:bg-sakura-200 transition">Hiragana Only</button>
+                    <button id="filterKatakanaOnly" type="button" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 hover:bg-rose-200 transition">Katakana Only</button>
+                    <button id="filterBoth" type="button" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-300 transition">Both</button>
+                </div>
+            </div>
+
+            <!-- Quick Selection Toolbar -->
+            <div class="px-4 py-2 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 flex flex-wrap gap-2 items-center justify-between text-xs">
+                <span class="text-slate-500 dark:text-slate-400 font-medium">Batch Controls:</span>
+                <div class="flex items-center space-x-2">
+                    <button id="selectAllBtn" type="button" class="px-3 py-1 rounded-md font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 transition">Select All</button>
+                    <button id="deselectAllBtn" type="button" class="px-3 py-1 rounded-md font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 transition">Deselect All</button>
+                </div>
+            </div>
+
+            <!-- Grid Container with Drag Select -->
+            <div id="settingsGridContainer" class="p-4 sm:p-6 overflow-y-auto flex-grow space-y-6 relative select-none bg-slate-50/50 dark:bg-slate-900/30">
+                <div id="dragSelectBox" class="hidden"></div>
+            </div>
+
+            <div class="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between">
+                <span id="selectedCountText" class="text-xs font-semibold text-slate-500 dark:text-slate-400">0 selected</span>
+                <div class="flex space-x-2">
+                    <button id="cancelSettingsBtn" type="button" class="px-4 py-2 rounded-xl text-sm font-medium border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition">Cancel</button>
+                    <button id="saveSettingsBtn" type="button" class="px-5 py-2 rounded-xl text-sm font-semibold bg-sakura-500 hover:bg-sakura-600 text-white transition shadow-sm shadow-sakura-500/30">Save & Start Quiz</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
