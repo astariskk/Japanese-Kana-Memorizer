@@ -314,6 +314,27 @@ const themeToggleBtn = document.getElementById('themeToggleBtn');
 const sunIcon = document.getElementById('sunIcon');
 const moonIcon = document.getElementById('moonIcon');
 
+window.addEventListener('keydown', (event) => {
+    const activeTag = document.activeElement?.tagName;
+    const isTypingField = activeTag === 'INPUT' || activeTag === 'TEXTAREA' || document.activeElement?.isContentEditable;
+
+    if (event.key === 'Enter' && isQuizFinished) {
+        event.preventDefault();
+        initQuiz();
+        return;
+    }
+
+    if (isTypingField) return;
+
+    if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        goPrevious();
+    } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        advanceNext();
+    }
+});
+
 // Instant Death Toggle Listener
 instantDeathToggle.addEventListener('change', (e) => {
     isInstantDeathMode = e.target.checked;
@@ -459,8 +480,8 @@ function renderMainCard() {
 
                 <!-- Action Controls -->
                 <div class="grid grid-cols-2 gap-3">
-                    <button id="skipBtn" type="button" class="py-2.5 px-4 rounded-xl border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm transition">
-                        Skip ↷
+                    <button id="previousBtn" type="button" class="py-2.5 px-4 rounded-xl border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-sm transition">
+                        ← Previous
                     </button>
                     <button id="nextBtn" type="button" class="py-2.5 px-4 rounded-xl bg-slate-800 dark:bg-slate-200 hover:bg-slate-900 dark:hover:bg-white text-white dark:text-slate-900 font-semibold text-sm transition shadow-sm">
                         Next →
@@ -514,7 +535,7 @@ function renderMainCard() {
     });
 
     document.getElementById('symbolClickBtn').addEventListener('click', advanceNext);
-    document.getElementById('skipBtn').addEventListener('click', advanceNext);
+    document.getElementById('previousBtn').addEventListener('click', goPrevious);
     document.getElementById('nextBtn').addEventListener('click', advanceNext);
     document.getElementById('giveUpBtn').addEventListener('click', autoGiveUp);
 }
@@ -615,6 +636,13 @@ function checkInput(val) {
             advanceNext();
         }
     }
+}
+
+function goPrevious() {
+    if (isQuizFinished || activeQuizItems.length === 0) return;
+
+    currentIndex = currentIndex === 0 ? activeQuizItems.length - 1 : currentIndex - 1;
+    renderMainCard();
 }
 
 function advanceNext() {
