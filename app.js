@@ -281,6 +281,14 @@ function playCorrectSound() {
     playTone(523.25, 'sine', 0.15);
     setTimeout(() => playTone(659.25, 'sine', 0.2), 100);
 }
+
+function playQuizClearSound() {
+    const notes = [523.25, 659.25, 783.99, 932.33, 1046.5];
+
+    notes.forEach((freq, index) => {
+        setTimeout(() => playTone(freq, 'sine', 0.20), index * 150);
+    });
+}
 function playWrongSound() {
     playTone(180, 'sawtooth', 0.3);
 }
@@ -613,12 +621,12 @@ function checkInput(val) {
 
     if (item.romaji.includes(val)) {
         userAnswers[item.id] = { userVal: val, isCorrect: true };
-        playCorrectSound();
         renderPracticeTable();
 
         if (Object.keys(userAnswers).length === activeQuizItems.length) {
             finishQuiz();
         } else {
+            playCorrectSound();
             advanceNext();
         }
     }
@@ -675,6 +683,7 @@ function finishQuiz() {
         }
     });
 
+    playQuizClearSound();
     renderMainCard();
     renderPracticeTable();
 }
