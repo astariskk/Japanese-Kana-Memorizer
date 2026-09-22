@@ -251,6 +251,7 @@ let userAnswers = {}; // id -> { userVal, isCorrect }
 let isQuizFinished = false;
 let activeTab = 'hiragana';
 let isInstantDeathMode = false;
+let allowRestart = false; // prevents immediate restart from the same Enter keypress
 
 // Auto-starting Timer logic
 const QUIZ_DURATION = 300; // 5 minutes in seconds
@@ -326,7 +327,7 @@ window.addEventListener('keydown', (event) => {
     const targetTag = event.target && event.target.tagName ? event.target.tagName.toLowerCase() : '';
     const isFormControl = targetTag === 'input' || targetTag === 'textarea' || targetTag === 'button';
 
-    if (event.key === 'Enter' && isQuizFinished && !isFormControl) {
+    if (event.key === 'Enter' && isQuizFinished && !isFormControl && allowRestart) {
         event.preventDefault();
         initQuiz();
     }
@@ -356,6 +357,7 @@ function shuffleArray(array) {
 }
 
 function initQuiz() {
+    allowRestart = false;
     const filtered = KANA_DATA.filter(k => selectedIds.has(k.id));
     activeQuizItems = filtered.length === 0 ? [] : shuffleArray(filtered);
 
@@ -544,12 +546,14 @@ function submitInstantDeathAnswer(val) {
 
     if (item.romaji.includes(val)) {
         userAnswers[item.id] = { userVal: val, isCorrect: true };
-        playCorrectSound();
-        renderPracticeTable();
-
+        // If this was the last item, finish the quiz directly and
+        // skip the per-item correct sound to avoid overlapping with
+        // the completion jingle.
         if (Object.keys(userAnswers).length === activeQuizItems.length) {
             finishQuiz();
         } else {
+            playCorrectSound();
+            renderPracticeTable();
             advanceNext();
         }
     } else {
@@ -572,6 +576,9 @@ function triggerInstantDeathLoss() {
 
     renderMainCard();
     renderPracticeTable();
+    // Prevent immediate restart from the same keypress; allow shortly after UI updates.
+    allowRestart = false;
+    setTimeout(() => { allowRestart = true; }, 250);
 }
 
 function renderCompletionCard() {
@@ -690,6 +697,9 @@ function finishQuiz() {
     playQuizClearSound();
     renderMainCard();
     renderPracticeTable();
+    // Allow restarting with Enter after the completion UI has rendered.
+    allowRestart = false;
+    setTimeout(() => { allowRestart = true; }, 250);
 }
 
 // Render Table (Max 3 Columns Enforced)
