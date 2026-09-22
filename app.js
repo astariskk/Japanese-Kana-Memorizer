@@ -315,23 +315,9 @@ const sunIcon = document.getElementById('sunIcon');
 const moonIcon = document.getElementById('moonIcon');
 
 window.addEventListener('keydown', (event) => {
-    const activeTag = document.activeElement?.tagName;
-    const isTypingField = activeTag === 'INPUT' || activeTag === 'TEXTAREA' || document.activeElement?.isContentEditable;
-
     if (event.key === 'Enter' && isQuizFinished) {
         event.preventDefault();
         initQuiz();
-        return;
-    }
-
-    if (isTypingField) return;
-
-    if (event.key === 'ArrowLeft') {
-        event.preventDefault();
-        goPrevious();
-    } else if (event.key === 'ArrowRight') {
-        event.preventDefault();
-        advanceNext();
     }
 });
 
