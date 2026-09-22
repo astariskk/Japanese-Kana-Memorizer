@@ -323,7 +323,10 @@ const sunIcon = document.getElementById('sunIcon');
 const moonIcon = document.getElementById('moonIcon');
 
 window.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter' && isQuizFinished) {
+    const targetTag = event.target && event.target.tagName ? event.target.tagName.toLowerCase() : '';
+    const isFormControl = targetTag === 'input' || targetTag === 'textarea' || targetTag === 'button';
+
+    if (event.key === 'Enter' && isQuizFinished && !isFormControl) {
         event.preventDefault();
         initQuiz();
     }
@@ -514,6 +517,7 @@ function renderMainCard() {
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
+            e.stopPropagation();
             const val = input.value.trim().toLowerCase();
 
             if (isInstantDeathMode) {
