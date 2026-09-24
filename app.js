@@ -290,8 +290,11 @@ function playQuizClearSound() {
         setTimeout(() => playTone(freq, 'sine', 0.20), index * 150);
     });
 }
-function playWrongSound() {
-    playTone(180, 'sawtooth', 0.3);
+
+function playFailSound() {
+    playTone(440, 'sine', 0.15);
+    setTimeout(() => playTone(349.23, 'sine', 0.15), 120);
+    setTimeout(() => playTone(261.63, 'sine', 0.25), 240);
 }
 
 // DOM elements
@@ -558,7 +561,7 @@ function submitInstantDeathAnswer(val) {
         }
     } else {
         userAnswers[item.id] = { userVal: val, isCorrect: false };
-        playWrongSound();
+        playFailSound();
         triggerInstantDeathLoss();
     }
 }
@@ -666,6 +669,7 @@ function advanceNext() {
 
 function autoGiveUp() {
     autoFinishWithGiveUp();
+    playFailSound();
 }
 
 function autoFinishWithGiveUp() {
