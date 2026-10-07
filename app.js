@@ -250,15 +250,23 @@ let currentIndex = 0;
 let userAnswers = {}; // id -> { userVal, isCorrect }
 let isQuizFinished = false;
 let activeTab = 'hiragana';
+let quizMode = 'normal'; // 'normal' | 'current' | 'insta-death'
 let isInstantDeathMode = false;
 let allowRestart = false; // prevents immediate restart from the same Enter keypress
 
 // Auto-starting Timer logic
-const QUIZ_DURATION = 300; // 5 minutes in seconds
-let timerSeconds = QUIZ_DURATION;
+const DEFAULT_QUIZ_DURATION = 150; // 5 minutes in seconds
+let quizDurationSeconds = DEFAULT_QUIZ_DURATION;
+let timerSeconds = quizDurationSeconds;
 let timerInterval = null;
 let isTimerRunning = false;
 let hasTimerStartedForQuiz = false;
+
+function sanitizeQuizDuration(value) {
+    const parsed = Number.parseInt(value, 10);
+    if (!Number.isFinite(parsed)) return DEFAULT_QUIZ_DURATION;
+    return Math.min(600, Math.max(15, parsed));
+}
 
 // Audio Context
 let audioCtx = null;
@@ -291,6 +299,11 @@ function playQuizClearSound() {
     });
 }
 
+function playWrongAnswerSound() {
+    playTone(440, 'sine', 0.15);
+    setTimeout(() => playTone(349.23, 'sine', 0.15), 120);
+}
+
 function playFailSound() {
     playTone(440, 'sine', 0.15);
     setTimeout(() => playTone(349.23, 'sine', 0.15), 120);
@@ -301,6 +314,7 @@ function playFailSound() {
 const quizCardSection = document.getElementById('quizCardSection');
 const tableContainer = document.getElementById('tableContainer');
 const activeCountLabel = document.getElementById('activeCountLabel');
+const quizDurationInput = document.getElementById('quizDurationInput');
 
 const instantDeathToggle = document.getElementById('instantDeathToggle');
 const settingsModal = document.getElementById('settingsModal');
@@ -336,9 +350,40 @@ window.addEventListener('keydown', (event) => {
     }
 });
 
+function getCurrentModeName() {
+    return activeTab === 'hiragana' ? 'Hiragana' : 'Katakana';
+}
+
+function getQuizModeLabel() {
+    if (quizMode === 'current') return 'Enter-Mode';
+    if (quizMode === 'insta-death') return 'Insta-Death';
+    return 'Normal';
+}
+
+function updateQuizModeState() {
+    isInstantDeathMode = quizMode === 'insta-death';
+    if (instantDeathToggle) {
+        instantDeathToggle.textContent = `Mode: ${getQuizModeLabel()}`;
+        instantDeathToggle.className = `rounded-lg border px-3 py-1.5 text-xs font-bold transition ${
+            quizMode === 'insta-death'
+                ? 'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-700'
+                : quizMode === 'current'
+                    ? 'bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-700'
+                    : 'bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-600'
+        }`;
+    }
+}
+
 // Instant Death Toggle Listener
-instantDeathToggle.addEventListener('change', (e) => {
-    isInstantDeathMode = e.target.checked;
+instantDeathToggle.addEventListener('click', () => {
+    if (quizMode === 'normal') {
+        quizMode = 'current';
+    } else if (quizMode === 'current') {
+        quizMode = 'insta-death';
+    } else {
+        quizMode = 'normal';
+    }
+    updateQuizModeState();
     initQuiz();
 });
 
@@ -370,7 +415,8 @@ function initQuiz() {
 
     stopTimer();
     hasTimerStartedForQuiz = false;
-    timerSeconds = QUIZ_DURATION;
+    timerSeconds = quizDurationSeconds;
+    updateQuizModeState();
 
     renderMainCard();
     renderPracticeTable();
@@ -449,7 +495,7 @@ function renderMainCard() {
                         <svg id="timerClockIcon" class="w-3.5 h-3.5 text-sakura-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
-                        <span id="timerDisplay" class="font-mono text-xs font-bold text-slate-700 dark:text-slate-200">05:00</span>
+                        <span id="timerDisplay" class="font-mono text-xs font-bold text-slate-700 dark:text-slate-200">02:30</span>
                         <span id="timerStatusBadge" class="text-[9px] font-semibold px-1 py-0.2 rounded bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300">Ready</span>
                     </div>
                 </div>
@@ -475,7 +521,7 @@ function renderMainCard() {
             <!-- Input Form -->
             <div class="w-full space-y-3">
                 <div class="relative">
-                    <input id="romajiInput" type="text" autocomplete="off" placeholder="${isInstantDeathMode ? 'Type Romaji and press Enter...' : 'Type Romaji (e.g. ka)...'}" 
+                    <input id="romajiInput" type="text" autocomplete="off" placeholder="${quizMode === 'insta-death' ? 'Type Romaji and press Enter...' : 'Type Romaji (e.g. ka)...'}" 
                         class="w-full px-5 py-3.5 text-center text-xl font-bold rounded-xl border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 focus:outline-none focus:border-sakura-500 dark:focus:border-sakura-400 transition shadow-sm ${isAnswered ? 'opacity-60' : ''}"
                         ${isAnswered ? 'disabled' : ''} />
                 </div>
@@ -525,12 +571,18 @@ function renderMainCard() {
             e.stopPropagation();
             const val = input.value.trim().toLowerCase();
 
-            if (isInstantDeathMode) {
+            if (quizMode === 'insta-death') {
                 if (val.length > 0 && !hasTimerStartedForQuiz && !isQuizFinished) {
                     hasTimerStartedForQuiz = true;
                     startTimer();
                 }
                 submitInstantDeathAnswer(val);
+            } else if (quizMode === 'current') {
+                if (val.length > 0 && !hasTimerStartedForQuiz && !isQuizFinished) {
+                    hasTimerStartedForQuiz = true;
+                    startTimer();
+                }
+                submitPenaltyModeAnswer(val);
             } else {
                 advanceNext();
             }
@@ -543,15 +595,40 @@ function renderMainCard() {
     document.getElementById('giveUpBtn').addEventListener('click', autoGiveUp);
 }
 
+function submitPenaltyModeAnswer(val) {
+    if (isQuizFinished || !val) return;
+    const item = activeQuizItems[currentIndex];
+
+    if (item.romaji.includes(val)) {
+        userAnswers[item.id] = { userVal: val, isCorrect: true };
+        if (Object.keys(userAnswers).length === activeQuizItems.length) {
+            finishQuiz();
+        } else {
+            playCorrectSound();
+            renderPracticeTable();
+            advanceNext();
+        }
+    } else {
+        userAnswers[item.id] = { userVal: val, isCorrect: false };
+        playWrongAnswerSound();
+        timerSeconds = Math.max(0, timerSeconds - 10);
+        updateTimerDisplay();
+
+        if (timerSeconds <= 0) {
+            autoGiveUp();
+            return;
+        }
+
+        renderPracticeTable();
+    }
+}
+
 function submitInstantDeathAnswer(val) {
     if (isQuizFinished || !val) return;
     const item = activeQuizItems[currentIndex];
 
     if (item.romaji.includes(val)) {
         userAnswers[item.id] = { userVal: val, isCorrect: true };
-        // If this was the last item, finish the quiz directly and
-        // skip the per-item correct sound to avoid overlapping with
-        // the completion jingle.
         if (Object.keys(userAnswers).length === activeQuizItems.length) {
             finishQuiz();
         } else {
@@ -588,7 +665,7 @@ function renderCompletionCard() {
     const correctCount = Object.values(userAnswers).filter(a => a.isCorrect).length;
     const totalCount = activeQuizItems.length;
     const accuracy = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
-    const timeSpent = QUIZ_DURATION - timerSeconds;
+    const timeSpent = quizDurationSeconds - timerSeconds;
     const mins = Math.floor(timeSpent / 60);
     const secs = timeSpent % 60;
 
@@ -675,6 +752,8 @@ function autoGiveUp() {
 function autoFinishWithGiveUp() {
     isQuizFinished = true;
     stopTimer();
+    timerSeconds = 0;
+    updateTimerDisplay();
     setTimerBadge('Timed Out', 'bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300');
 
     activeQuizItems.forEach(item => {
@@ -826,6 +905,9 @@ function stopTimer() {
 function openSettingsModal() {
     renderSettingsGrid();
     updateSettingsCount();
+    if (quizDurationInput) {
+        quizDurationInput.value = quizDurationSeconds;
+    }
     settingsModal.classList.remove('hidden');
     setTimeout(() => {
         settingsModal.classList.remove('opacity-0');
@@ -866,6 +948,9 @@ function updateTabStyles() {
 }
 
 saveSettingsBtn.addEventListener('click', () => {
+    quizDurationSeconds = sanitizeQuizDuration(quizDurationInput ? quizDurationInput.value : DEFAULT_QUIZ_DURATION);
+    timerSeconds = quizDurationSeconds;
+    updateTimerDisplay();
     closeSettingsModal();
     initQuiz();
 });
