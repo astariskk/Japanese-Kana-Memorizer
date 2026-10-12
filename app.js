@@ -455,6 +455,38 @@ function formatCategory(type, category) {
     return 'hiragana • katakana';
 }
 
+function triggerWrongAnswerFlash() {
+    if (!quizCardSection) return;
+
+    quizCardSection.style.position = 'relative';
+    quizCardSection.style.overflow = 'hidden';
+
+    const existingFlash = quizCardSection.querySelector('.wrong-answer-flash');
+    if (existingFlash) {
+        existingFlash.remove();
+    }
+
+    const flash = document.createElement('div');
+    flash.className = 'wrong-answer-flash';
+    flash.style.position = 'absolute';
+    flash.style.inset = '0';
+    flash.style.pointerEvents = 'none';
+    flash.style.borderRadius = 'inherit';
+    flash.style.backgroundColor = 'rgba(244, 63, 94, 0.5)';
+    flash.style.opacity = '1';
+    flash.style.transition = 'opacity 0.5s ease-out';
+    flash.style.zIndex = '10';
+    quizCardSection.appendChild(flash);
+
+    requestAnimationFrame(() => {
+        flash.style.opacity = '0';
+    });
+
+    setTimeout(() => {
+        flash.remove();
+    }, 500);
+}
+
 // Render Main Practice Card
 function renderMainCard() {
     if (activeQuizItems.length === 0) {
@@ -486,7 +518,7 @@ function renderMainCard() {
     const categoryTitle = categoryDetails.length ? categoryDetails.join('\n') : formatCategory(item.type, item.category);
 
     quizCardSection.innerHTML = `
-        <div class="w-full max-w-md flex flex-col items-center space-y-6">
+        <div class="quiz-card-shell w-full max-w-md flex flex-col items-center space-y-6">
             <div class="flex items-center justify-between w-full text-xs text-slate-400 font-medium">
                 <div class="flex items-center space-x-3">
                     <span>ITEM ${currentIndex + 1} OF ${activeQuizItems.length}</span>
@@ -610,6 +642,7 @@ function submitPenaltyModeAnswer(val) {
         }
     } else {
         userAnswers[item.id] = { userVal: val, isCorrect: false };
+        triggerWrongAnswerFlash();
         playWrongAnswerSound();
         timerSeconds = Math.max(0, timerSeconds - 10);
         updateTimerDisplay();
@@ -638,6 +671,7 @@ function submitInstantDeathAnswer(val) {
         }
     } else {
         userAnswers[item.id] = { userVal: val, isCorrect: false };
+        triggerWrongAnswerFlash();
         playFailSound();
         triggerInstantDeathLoss();
     }
@@ -655,6 +689,7 @@ function triggerInstantDeathLoss() {
     });
 
     renderMainCard();
+    triggerWrongAnswerFlash();
     renderPracticeTable();
     // Prevent immediate restart from the same keypress; allow shortly after UI updates.
     allowRestart = false;
