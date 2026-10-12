@@ -250,7 +250,7 @@ let currentIndex = 0;
 let userAnswers = {}; // id -> { userVal, isCorrect }
 let isQuizFinished = false;
 let activeTab = 'hiragana';
-let quizMode = 'normal'; // 'normal' | 'current' | 'insta-death'
+let quizMode = 'normal'; // 'normal' | 'enter-mode' | 'insta-death'
 let isInstantDeathMode = false;
 let allowRestart = false; // prevents immediate restart from the same Enter keypress
 
@@ -355,7 +355,7 @@ function getCurrentModeName() {
 }
 
 function getQuizModeLabel() {
-    if (quizMode === 'current') return 'Enter-Mode';
+    if (quizMode === 'enter-mode') return 'Enter-Mode';
     if (quizMode === 'insta-death') return 'Insta-Death';
     return 'Normal';
 }
@@ -367,7 +367,7 @@ function updateQuizModeState() {
         instantDeathToggle.className = `rounded-lg border px-3 py-1.5 text-xs font-bold transition ${
             quizMode === 'insta-death'
                 ? 'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-700'
-                : quizMode === 'current'
+                : quizMode === 'enter-mode'
                     ? 'bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-700'
                     : 'bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-600'
         }`;
@@ -377,8 +377,8 @@ function updateQuizModeState() {
 // Instant Death Toggle Listener
 instantDeathToggle.addEventListener('click', () => {
     if (quizMode === 'normal') {
-        quizMode = 'current';
-    } else if (quizMode === 'current') {
+        quizMode = 'enter-mode';
+    } else if (quizMode === 'enter-mode') {
         quizMode = 'insta-death';
     } else {
         quizMode = 'normal';
@@ -560,7 +560,7 @@ function renderMainCard() {
             startTimer();
         }
 
-        if (!isInstantDeathMode) {
+        if (quizMode === 'normal' && !isInstantDeathMode) {
             checkInput(val);
         }
     });
@@ -577,7 +577,7 @@ function renderMainCard() {
                     startTimer();
                 }
                 submitInstantDeathAnswer(val);
-            } else if (quizMode === 'current') {
+            } else if (quizMode === 'enter-mode') {
                 if (val.length > 0 && !hasTimerStartedForQuiz && !isQuizFinished) {
                     hasTimerStartedForQuiz = true;
                     startTimer();
